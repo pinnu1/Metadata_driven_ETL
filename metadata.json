@@ -3,12 +3,10 @@
     "name": "metadata_driven_dlt_pipeline",
     "load_strategy": "load_once"
   },
-
   "azure_sql": {
     "server": "fabricp",
     "password": ""
   },
-
   "tables": [
     {
       "table_name": "customer",
@@ -318,12 +316,14 @@
             {
               "table": "silver_customeraddress",
               "on": "customerid",
-              "join_type": "left"
+              "join_type": "left",
+              "drop_columns": ["rowguid", "modifieddate", "silver_processed_ts"]
             },
             {
               "table": "silver_address",
               "on": "addressid",
-              "join_type": "left"
+              "join_type": "left",
+              "drop_columns": ["rowguid", "modifieddate", "silver_processed_ts"]
             }
           ],
           "output": {
@@ -344,7 +344,8 @@
             {
               "table": "silver_productcategory",
               "on": "productcategoryid",
-              "join_type": "left"
+              "join_type": "left",
+              "drop_columns": ["name", "rowguid", "modifieddate", "silver_processed_ts"]
             }
           ],
           "output": {
@@ -365,7 +366,8 @@
             {
               "table": "silver_salesorderdetail",
               "on": "salesorderid",
-              "join_type": "inner"
+              "join_type": "inner",
+              "drop_columns": ["rowguid", "modifieddate", "silver_processed_ts"]
             }
           ],
           "output": {
@@ -374,6 +376,5 @@
         }
       }
     }
-
   ]
 }
