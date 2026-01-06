@@ -30,6 +30,7 @@
           }
         },
         "silver": {
+          "table_type": "dimension",
           "batch_precedence_id": 2,
           "dependency_type": "base",
           "input": "bronze_customer",
@@ -87,6 +88,7 @@
           }
         },
         "silver": {
+          "table_type": "dimension",
           "batch_precedence_id": 2,
           "dependency_type": "base",
           "input": "bronze_address",
@@ -131,6 +133,7 @@
           }
         },
         "silver": {
+          "table_type": "dimension",
           "batch_precedence_id": 2,
           "dependency_type": "base",
           "input": "bronze_customeraddress",
@@ -172,6 +175,7 @@
           }
         },
         "silver": {
+          "table_type": "dimension",
           "batch_precedence_id": 2,
           "dependency_type": "base",
           "input": "bronze_product",
@@ -215,6 +219,7 @@
           }
         },
         "silver": {
+          "table_type": "dimension",
           "batch_precedence_id": 2,
           "dependency_type": "base",
           "input": "bronze_productcategory",
@@ -250,6 +255,7 @@
           }
         },
         "silver": {
+          "table_type": "fact",
           "batch_precedence_id": 2,
           "dependency_type": "base",
           "input": "bronze_salesorderheader",
@@ -285,6 +291,7 @@
           }
         },
         "silver": {
+          "table_type": "fact",
           "batch_precedence_id": 2,
           "dependency_type": "base",
           "input": "bronze_salesorderdetail",
@@ -309,6 +316,7 @@
       "enabled": true,
       "layers": {
         "silver": {
+          "table_type": "dimension",
           "batch_precedence_id": 2,
           "dependency_type": "join",
           "input": "silver_customer",
@@ -337,6 +345,7 @@
       "enabled": true,
       "layers": {
         "silver": {
+          "table_type": "dimension",
           "batch_precedence_id": 2,
           "dependency_type": "join",
           "input": "silver_product",
@@ -359,6 +368,7 @@
       "enabled": true,
       "layers": {
         "silver": {
+          "table_type": "dimension",
           "batch_precedence_id": 2,
           "dependency_type": "join",
           "input": "silver_salesorderheader",
