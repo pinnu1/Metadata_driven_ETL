@@ -6,54 +6,53 @@
 
   "azure_sql": {
     "server": "fabricp",
-    "username": "prashant",
     "password": ""
   },
 
   "tables": [
+
+    /* ================= CUSTOMER ================= */
     {
       "table_name": "customer",
       "enabled": true,
-
       "layers": {
         "bronze": {
           "batch_precedence_id": 1,
           "type": "streaming",
-
           "source": {
             "system": "azure_sql",
             "database": "db_testing",
             "schema": "SalesLT",
             "table": "Customer"
           },
-
           "incremental": {
             "enabled": true,
             "column": "ModifiedDate"
           },
-
           "target": {
             "table": "bronze_customer"
           }
         },
-
         "silver": {
           "batch_precedence_id": 2,
           "dependency_type": "base",
-
           "input": "bronze_customer",
-
           "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" },
             {
-              "step_type": "generic_cleaning"
-            },
-            {
-              "step_type": "lowercase_columns"
+              "step_type": "handle_nulls",
+              "options": {
+                "fill_map": {
+                  "companyname": "unknown",
+                  "emailaddress": "unknown"
+                }
+              }
             },
             {
               "step_type": "mask_pii",
               "options": {
-                "columns": ["phone"]
+                "columns": ["emailaddress", "phone"]
               }
             },
             {
@@ -64,12 +63,337 @@
               }
             }
           ],
-
           "output": {
             "table": "silver_customer"
           }
         }
       }
+    },
+
+    /* ================= ADDRESS ================= */
+    {
+      "table_name": "address",
+      "enabled": true,
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "type": "streaming",
+          "source": {
+            "system": "azure_sql",
+            "database": "db_testing",
+            "schema": "SalesLT",
+            "table": "Address"
+          },
+          "incremental": {
+            "enabled": true,
+            "column": "ModifiedDate"
+          },
+          "target": {
+            "table": "bronze_address"
+          }
+        },
+        "silver": {
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+          "input": "bronze_address",
+          "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" },
+            {
+              "step_type": "handle_nulls",
+              "options": {
+                "fill_map": {
+                  "city": "unknown",
+                  "stateprovince": "unknown"
+                }
+              }
+            }
+          ],
+          "output": {
+            "table": "silver_address"
+          }
+        }
+      }
+    },
+
+    /* ================= CUSTOMERADDRESS ================= */
+    {
+      "table_name": "customeraddress",
+      "enabled": true,
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "type": "streaming",
+          "source": {
+            "system": "azure_sql",
+            "database": "db_testing",
+            "schema": "SalesLT",
+            "table": "CustomerAddress"
+          },
+          "incremental": {
+            "enabled": true,
+            "column": "ModifiedDate"
+          },
+          "target": {
+            "table": "bronze_customeraddress"
+          }
+        },
+        "silver": {
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+          "input": "bronze_customeraddress",
+          "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" },
+            {
+              "step_type": "apply_row_filters",
+              "options": {
+                "condition": "customerid IS NOT NULL AND addressid IS NOT NULL"
+              }
+            }
+          ],
+          "output": {
+            "table": "silver_customeraddress"
+          }
+        }
+      }
+    },
+
+    /* ================= PRODUCT ================= */
+    {
+      "table_name": "product",
+      "enabled": true,
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "type": "streaming",
+          "source": {
+            "system": "azure_sql",
+            "database": "db_testing",
+            "schema": "SalesLT",
+            "table": "Product"
+          },
+          "incremental": {
+            "enabled": true,
+            "column": "ModifiedDate"
+          },
+          "target": {
+            "table": "bronze_product"
+          }
+        },
+        "silver": {
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+          "input": "bronze_product",
+          "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" },
+            {
+              "step_type": "handle_nulls",
+              "options": {
+                "fill_map": {
+                  "color": "unknown"
+                }
+              }
+            }
+          ],
+          "output": {
+            "table": "silver_product"
+          }
+        }
+      }
+    },
+
+    /* ================= PRODUCTCATEGORY ================= */
+    {
+      "table_name": "productcategory",
+      "enabled": true,
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "type": "streaming",
+          "source": {
+            "system": "azure_sql",
+            "database": "db_testing",
+            "schema": "SalesLT",
+            "table": "ProductCategory"
+          },
+          "incremental": {
+            "enabled": true,
+            "column": "ModifiedDate"
+          },
+          "target": {
+            "table": "bronze_productcategory"
+          }
+        },
+        "silver": {
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+          "input": "bronze_productcategory",
+          "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" }
+          ],
+          "output": {
+            "table": "silver_productcategory"
+          }
+        }
+      }
+    },
+
+    /* ================= SALES ORDER HEADER ================= */
+    {
+      "table_name": "salesorderheader",
+      "enabled": true,
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "type": "streaming",
+          "source": {
+            "system": "azure_sql",
+            "database": "db_testing",
+            "schema": "SalesLT",
+            "table": "SalesOrderHeader"
+          },
+          "incremental": {
+            "enabled": true,
+            "column": "ModifiedDate"
+          },
+          "target": {
+            "table": "bronze_salesorderheader"
+          }
+        },
+        "silver": {
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+          "input": "bronze_salesorderheader",
+          "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" }
+          ],
+          "output": {
+            "table": "silver_salesorderheader"
+          }
+        }
+      }
+    },
+
+    /* ================= SALES ORDER DETAIL ================= */
+    {
+      "table_name": "salesorderdetail",
+      "enabled": true,
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "type": "streaming",
+          "source": {
+            "system": "azure_sql",
+            "database": "db_testing",
+            "schema": "SalesLT",
+            "table": "SalesOrderDetail"
+          },
+          "incremental": {
+            "enabled": true,
+            "column": "ModifiedDate"
+          },
+          "target": {
+            "table": "bronze_salesorderdetail"
+          }
+        },
+        "silver": {
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+          "input": "bronze_salesorderdetail",
+          "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" },
+            {
+              "step_type": "apply_row_filters",
+              "options": {
+                "condition": "orderqty > 0 AND unitprice >= 0"
+              }
+            }
+          ],
+          "output": {
+            "table": "silver_salesorderdetail"
+          }
+        }
+      }
+    },
+
+    /* ================= SILVER JOIN: CUSTOMER + ADDRESS ================= */
+    {
+      "table_name": "customer_address_join",
+      "enabled": true,
+      "layers": {
+        "silver": {
+          "batch_precedence_id": 2,
+          "dependency_type": "join",
+          "input": "silver_customer",
+          "joins": [
+            {
+              "table": "silver_customeraddress",
+              "on": "customerid",
+              "join_type": "left"
+            },
+            {
+              "table": "silver_address",
+              "on": "addressid",
+              "join_type": "left"
+            }
+          ],
+          "output": {
+            "table": "silver_customer_address"
+          }
+        }
+      }
+    },
+
+    /* ================= SILVER JOIN: PRODUCT + CATEGORY ================= */
+    {
+      "table_name": "product_category_join",
+      "enabled": true,
+      "layers": {
+        "silver": {
+          "batch_precedence_id": 2,
+          "dependency_type": "join",
+          "input": "silver_product",
+          "joins": [
+            {
+              "table": "silver_productcategory",
+              "on": "productcategoryid",
+              "join_type": "left"
+            }
+          ],
+          "output": {
+            "table": "silver_product_dim"
+          }
+        }
+      }
+    },
+
+    /* ================= SILVER JOIN: ORDER FACT ================= */
+    {
+      "table_name": "order_fact_join",
+      "enabled": true,
+      "layers": {
+        "silver": {
+          "batch_precedence_id": 2,
+          "dependency_type": "join",
+          "input": "silver_salesorderheader",
+          "joins": [
+            {
+              "table": "silver_salesorderdetail",
+              "on": "salesorderid",
+              "join_type": "inner"
+            }
+          ],
+          "output": {
+            "table": "silver_order_fact"
+          }
+        }
+      }
     }
+
   ]
 }
