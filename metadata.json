@@ -385,6 +385,66 @@
           }
         }
       }
+    },
+    {
+      "table_name": "gold_customer_sales_kpi_sql",
+      "enabled": true,
+      "layers": {
+        "gold": {
+          "batch_precedence_id": 3,
+          "kpi_type": "sql",
+          "input_table": "silver_order_fact",
+          "sql": "SELECT customerid, COUNT(DISTINCT salesorderid) AS total_orders, SUM(orderqty * unitprice) AS total_sales, AVG(orderqty * unitprice) AS avg_order_value FROM silver_order_fact GROUP BY customerid",
+          "output": {
+            "table": "gold_customer_sales_kpi"
+          }
+        }
+      }
+    },
+    {
+      "table_name": "gold_product_sales_kpi_sql",
+      "enabled": true,
+      "layers": {
+        "gold": {
+          "batch_precedence_id": 3,
+          "kpi_type": "sql",
+          "input_table": "silver_order_fact",
+          "sql": "SELECT productid, SUM(orderqty) AS total_quantity_sold, SUM(orderqty * unitprice) AS total_revenue FROM silver_order_fact GROUP BY productid",
+          "output": {
+            "table": "gold_product_sales_kpi"
+          }
+        }
+      }
+    },
+    {
+      "table_name": "gold_daily_sales_kpi_sql",
+      "enabled": true,
+      "layers": {
+        "gold": {
+          "batch_precedence_id": 3,
+          "kpi_type": "sql",
+          "input_table": "silver_salesorderheader",
+          "sql": "SELECT CAST(orderdate AS DATE) AS order_date, COUNT(DISTINCT salesorderid) AS total_orders, SUM(totaldue) AS total_revenue FROM silver_salesorderheader GROUP BY CAST(orderdate AS DATE)",
+          "output": {
+            "table": "gold_daily_sales_kpi"
+          }
+        }
+      }
+    },
+    {
+      "table_name": "gold_region_sales_kpi_sql",
+      "enabled": true,
+      "layers": {
+        "gold": {
+          "batch_precedence_id": 3,
+          "kpi_type": "sql",
+          "input_table": "silver_customer_address",
+          "sql": "SELECT stateprovince, city, COUNT(DISTINCT salesorderid) AS total_orders, SUM(orderqty * unitprice) AS total_revenue FROM silver_customer_address ca JOIN silver_order_fact of ON ca.customerid = of.customerid GROUP BY stateprovince, city",
+          "output": {
+            "table": "gold_region_sales_kpi"
+          }
+        }
+      }
     }
   ]
 }
