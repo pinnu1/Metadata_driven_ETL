@@ -15,7 +15,7 @@
         "bronze": {
           "batch_precedence_id": 1,
           "type": "streaming",
-          "source": { "database": "olist", "schema": "dbo", "table": "olist_customers_dataset" },
+          "source": { "database": "olist_sales", "schema": "dbo", "table": "olist_customers_dataset" },
           "incremental": { "enabled": true, "column": "customer_id" },
           "target": { "table": "bronze_customers" }
         },
@@ -40,7 +40,7 @@
         "bronze": {
           "batch_precedence_id": 1,
           "type": "streaming",
-          "source": { "database": "olist", "schema": "dbo", "table": "olist_orders_dataset" },
+          "source": { "database": "olist_sales", "schema": "dbo", "table": "olist_orders_dataset" },
           "incremental": { "enabled": true, "column": "order_purchase_timestamp" },
           "target": { "table": "bronze_orders" }
         },
@@ -64,7 +64,7 @@
         "bronze": {
           "batch_precedence_id": 1,
           "type": "streaming",
-          "source": { "database": "olist", "schema": "dbo", "table": "olist_order_items_dataset" },
+          "source": { "database": "olist_sales", "schema": "dbo", "table": "olist_order_items_dataset" },
           "incremental": { "enabled": true, "column": "shipping_limit_date" },
           "target": { "table": "bronze_order_items" }
         },
@@ -89,7 +89,7 @@
         "bronze": {
           "batch_precedence_id": 1,
           "type": "streaming",
-          "source": { "database": "olist", "schema": "dbo", "table": "olist_products_dataset" },
+          "source": { "database": "olist_sales", "schema": "dbo", "table": "olist_products_dataset" },
           "incremental": { "enabled": true, "column": "product_id" },
           "target": { "table": "bronze_products" }
         },
@@ -114,7 +114,7 @@
         "bronze": {
           "batch_precedence_id": 1,
           "type": "streaming",
-          "source": { "database": "olist", "schema": "dbo", "table": "olist_sellers_dataset" },
+          "source": { "database": "olist_sales", "schema": "dbo", "table": "olist_sellers_dataset" },
           "incremental": { "enabled": true, "column": "seller_id" },
           "target": { "table": "bronze_sellers" }
         },
@@ -138,7 +138,7 @@
         "bronze": {
           "batch_precedence_id": 1,
           "type": "streaming",
-          "source": { "database": "olist", "schema": "dbo", "table": "olist_order_payments_dataset" },
+          "source": { "database": "olist_sales", "schema": "dbo", "table": "olist_order_payments_dataset" },
           "incremental": { "enabled": false },
           "target": { "table": "bronze_payments" }
         },
@@ -159,7 +159,7 @@
         "bronze": {
           "batch_precedence_id": 1,
           "type": "streaming",
-          "source": { "database": "olist", "schema": "dbo", "table": "olist_order_reviews_dataset" },
+          "source": { "database": "olist_sales", "schema": "dbo", "table": "olist_order_reviews_dataset" },
           "incremental": { "enabled": true, "column": "review_creation_date" },
           "target": { "table": "bronze_reviews" }
         },
@@ -180,7 +180,7 @@
         "bronze": {
           "batch_precedence_id": 1,
           "type": "streaming",
-          "source": { "database": "olist", "schema": "dbo", "table": "olist_geolocation_dataset" },
+          "source": { "database": "olist_sales", "schema": "dbo", "table": "olist_geolocation_dataset" },
           "incremental": { "enabled": false },
           "target": { "table": "bronze_geolocation" }
         },
@@ -201,7 +201,7 @@
         "bronze": {
           "batch_precedence_id": 1,
           "type": "streaming",
-          "source": { "database": "olist", "schema": "dbo", "table": "product_category_name_translation" },
+          "source": { "database": "olist_sales", "schema": "dbo", "table": "product_category_name_translation" },
           "incremental": { "enabled": false },
           "target": { "table": "bronze_category_translation" }
         },
