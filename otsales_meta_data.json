@@ -226,7 +226,7 @@
           "input": "silver_orders",
           "joins": [
             { "table": "silver_order_items", "on": "order_id", "join_type": "inner", "drop_columns": ["silver_processed_ts", "shipping_limit_date"] },
-            { "table": "silver_customers", "on": "customer_id", "join_type": "left", "drop_columns": ["silver_processed_ts", "customer_id"] }
+            { "table": "silver_customers", "on": "customer_id", "join_type": "left", "drop_columns": ["silver_processed_ts", "customer_sk"] }
           ],
           "output": { "table": "silver_master_sales" }
         }
