@@ -1,0 +1,236 @@
+{
+  "pipeline": {
+    "name": "olist_metadata_driven_pipeline",
+    "load_strategy": "load_once"
+  },
+  "azure_sql": {
+    "server": "your_sql_server_name",
+    "password": ""
+  },
+  "tables": [
+    {
+      "table_name": "customers",
+      "enabled": true,
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "source": {
+            "database": "olist_sales",
+            "schema": "dbo",
+            "table": "olist_customers_dataset"
+          },
+          "incremental": {
+            "enabled": true,
+            "column": "customer_id"
+          },
+          "target": { "table": "bronze_customers" }
+        },
+        "silver": {
+          "table_type": "dimension",
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+          "input": "bronze_customers",
+          "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" },
+            {
+              "step_type": "add_surrogate_key_from_natural_key",
+              "options": {
+                "natural_key": "customer_id",
+                "sk_name": "customer_sk"
+              }
+            }
+          ],
+          "output": { "table": "silver_customers" }
+        }
+      }
+    },
+    {
+      "table_name": "orders",
+      "enabled": true,
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "source": {
+            "database": "olist_sales",
+            "schema": "dbo",
+            "table": "olist_orders_dataset"
+          },
+          "incremental": {
+            "enabled": true,
+            "column": "order_purchase_timestamp"
+          },
+          "target": { "table": "bronze_orders" }
+        },
+        "silver": {
+          "table_type": "fact",
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+          "input": "bronze_orders",
+          "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" }
+          ],
+          "output": { "table": "silver_orders" }
+        }
+      }
+    },
+    {
+      "table_name": "order_items",
+      "enabled": true,
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "source": {
+            "database": "olist_sales",
+            "schema": "dbo",
+            "table": "olist_order_items_dataset"
+          },
+          "incremental": {
+            "enabled": true,
+            "column": "shipping_limit_date"
+          },
+          "target": { "table": "bronze_order_items" }
+        },
+        "silver": {
+          "table_type": "fact",
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+          "input": "bronze_order_items",
+          "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" },
+            {
+              "step_type": "apply_row_filters",
+              "options": { "condition": "price >= 0 AND freight_value >= 0" }
+            }
+          ],
+          "output": { "table": "silver_order_items" }
+        }
+      }
+    },
+    {
+      "table_name": "products",
+      "enabled": true,
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "source": {
+            "database": "olist_sales",
+            "schema": "dbo",
+            "table": "olist_products_dataset"
+          },
+          "incremental": {
+            "enabled": true,
+            "column": "product_id"
+          },
+          "target": { "table": "bronze_products" }
+        },
+        "silver": {
+          "table_type": "dimension",
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+          "input": "bronze_products",
+          "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" },
+            {
+              "step_type": "add_surrogate_key_from_natural_key",
+              "options": {
+                "natural_key": "product_id",
+                "sk_name": "product_sk"
+              }
+            }
+          ],
+          "output": { "table": "silver_products" }
+        }
+      }
+    },
+    {
+      "table_name": "sellers",
+      "enabled": true,
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "source": {
+            "database": "olist_sales",
+            "schema": "dbo",
+            "table": "olist_sellers_dataset"
+          },
+          "incremental": {
+            "enabled": true,
+            "column": "seller_id"
+          },
+          "target": { "table": "bronze_sellers" }
+        },
+        "silver": {
+          "table_type": "dimension",
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+          "input": "bronze_sellers",
+          "steps": [
+            { "step_type": "generic_cleaning" },
+            { "step_type": "lowercase_columns" },
+            {
+              "step_type": "add_surrogate_key_from_natural_key",
+              "options": {
+                "natural_key": "seller_id",
+                "sk_name": "seller_sk"
+              }
+            }
+          ],
+          "output": { "table": "silver_sellers" }
+        }
+      }
+    },
+    {
+      "table_name": "order_fact_join",
+      "enabled": true,
+      "layers": {
+        "silver": {
+          "table_type": "fact",
+          "batch_precedence_id": 2,
+          "dependency_type": "join",
+          "input": "silver_orders",
+          "joins": [
+            {
+              "table": "silver_order_items",
+              "on": "order_id",
+              "join_type": "inner",
+              "drop_columns": [
+                "shipping_limit_date", 
+                "silver_processed_ts", 
+                "order_purchase_timestamp"
+              ]
+            }
+          ],
+          "output": { "table": "silver_order_fact" }
+        }
+      }
+    },
+    {
+      "table_name": "gold_customer_sales_kpi",
+      "enabled": true,
+      "layers": {
+        "gold": {
+          "batch_precedence_id": 3,
+          "kpi_type": "sql",
+          "sql": "SELECT customer_id, COUNT(DISTINCT order_id) AS total_orders, SUM(price + freight_value) AS total_sales FROM silver_order_fact GROUP BY customer_id",
+          "output": { "table": "gold_customer_sales_kpi" }
+        }
+      }
+    },
+    {
+      "table_name": "gold_product_sales_kpi",
+      "enabled": true,
+      "layers": {
+        "gold": {
+          "batch_precedence_id": 3,
+          "kpi_type": "sql",
+          "sql": "SELECT product_id, SUM(order_item_id) AS total_items_sold, SUM(price) AS total_revenue FROM silver_order_fact GROUP BY product_id",
+          "output": { "table": "gold_product_sales_kpi" }
+        }
+      }
+    }
+  ]
+}
