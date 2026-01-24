@@ -1,0 +1,75 @@
+{
+  "pipeline": {
+    "name": "metadata_driven_dlt_pipeline",
+    "load_strategy": "load_once"
+  },
+
+  "azure_sql": {
+    "server": "fabricp",
+    "username": "prashant",
+    "password": "Yashgarg@123"
+  },
+
+  "tables": [
+    {
+      "table_name": "customer",
+      "enabled": true,
+
+      "layers": {
+        "bronze": {
+          "batch_precedence_id": 1,
+          "type": "streaming",
+
+          "source": {
+            "system": "azure_sql",
+            "database": "db_testing",
+            "schema": "SalesLT",
+            "table": "Customer"
+          },
+
+          "incremental": {
+            "enabled": true,
+            "column": "ModifiedDate"
+          },
+
+          "target": {
+            "table": "bronze_customer"
+          }
+        },
+
+        "silver": {
+          "batch_precedence_id": 2,
+          "dependency_type": "base",
+
+          "input": "bronze_customer",
+
+          "steps": [
+            {
+              "step_type": "generic_cleaning"
+            },
+            {
+              "step_type": "lowercase_columns"
+            },
+            {
+              "step_type": "mask_pii",
+              "options": {
+                "columns": ["phone"]
+              }
+            },
+            {
+              "step_type": "add_surrogate_key",
+              "options": {
+                "natural_key": "customerid",
+                "sk_name": "customer_sk"
+              }
+            }
+          ],
+
+          "output": {
+            "table": "silver_customer"
+          }
+        }
+      }
+    }
+  ]
+}
